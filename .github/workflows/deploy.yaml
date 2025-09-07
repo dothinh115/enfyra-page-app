@@ -15,7 +15,7 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
             # Set project variables
-            export PROJECT_NAME="enfyra-app"
+            export PROJECT_NAME="app"
             export APP_DIR="/apps/$PROJECT_NAME"
 
             # Setup PATH for tools

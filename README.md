@@ -5,7 +5,7 @@
 [![Vue](https://img.shields.io/badge/Vue-3-green.svg)](https://vuejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)](https://www.typescriptlang.org/)
 
-A modern, extensible headless CMS built with Nuxt 4, featuring dynamic table management, extension system, API composables with automatic error handling, and a responsive Vue.js interface.
+A modern, extensible headless CMS built with Nuxt 4, featuring dynamic table management, extension system, API composables with automatic error handling, and a responsive Vue.js interface. Updated deployment structure.
 
 ## Features
 
