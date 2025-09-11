@@ -70,6 +70,6 @@ export default defineNuxtConfig({
     },
   },
   enfyraSDK: {
-    apiUrl: "http://localhost:1105"
+    apiUrl: process.env.API_URL,
   },
 });
