@@ -63,15 +63,12 @@
 </template>
 
 <script setup lang="ts">
-// useEnfyraApi is auto-imported in Nuxt
-
 const route = useRoute();
 const toast = useToast();
 const { confirm } = useConfirm();
+const { loadRoutes } = useRoutes();
 
 const tableName = "route_definition";
-
-// Form changes tracking via FormEditor
 const hasFormChanges = ref(false);
 const formEditorRef = ref();
 
@@ -121,7 +118,7 @@ const {
   data: routeData,
   pending: loading,
   execute: executeGetRoute,
-} = useEnfyraApi(`/${tableName}`, {
+} = useApi(`/${tableName}`, {
   query: {
     fields: getIncludeFields(),
     filter: { id: { _eq: route.params.id } },
@@ -133,7 +130,7 @@ const {
   error: updateError,
   execute: executeUpdateRoute,
   pending: updateLoading,
-} = useEnfyraApi(`/${tableName}`, {
+} = useApi(`/${tableName}`, {
   method: "patch",
   errorContext: "Update Route",
 });
@@ -142,7 +139,7 @@ const {
   error: deleteError,
   execute: executeDeleteRoute,
   pending: deleteLoading,
-} = useEnfyraApi(`/${tableName}`, {
+} = useApi(`/${tableName}`, {
   method: "delete",
   errorContext: "Delete Route",
 });
@@ -151,7 +148,6 @@ const form = ref<Record<string, any>>({});
 
 const errors = ref<Record<string, string>>({});
 
-// Initialize form data
 async function initializeForm() {
   await executeGetRoute();
   const data = routeData.value?.data?.[0];
@@ -190,7 +186,8 @@ async function updateRoute() {
   });
   errors.value = {};
 
-  // Confirm form changes as new baseline
+  await loadRoutes();
+
   formEditorRef.value?.confirmChanges();
 }
 
@@ -212,6 +209,9 @@ async function deleteRoute() {
     description: "Route deleted successfully", 
     color: "success" 
   });
+
+  await loadRoutes();
+  
   await navigateTo("/settings/routings");
 }
 
