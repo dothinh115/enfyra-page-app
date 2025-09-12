@@ -22,6 +22,7 @@ Each page can register its own actions, ensuring the header always displays rele
 
 ## Data Structure
 
+
 ### HeaderAction Interface
 
 ```typescript
