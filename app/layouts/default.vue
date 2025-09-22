@@ -113,7 +113,7 @@
       <section class="flex-1 min-h-0 overflow-auto relative z-10 pb-7">
         <!-- Content background with subtle styling -->
         <div
-          class="min-h-full bg-gradient-to-b from-background/50 to-transparent rounded-xl backdrop-blur-sm"
+          class="min-h-full bg-gradient-to-b from-background/50 to-transparent rounded-xl backdrop-blur-sm md:pb-20"
         >
           <div class="px-6 pt-6 pb-6 md:pb-20">
             <slot />
