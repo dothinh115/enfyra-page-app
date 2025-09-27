@@ -1,36 +1,33 @@
-# Enfyra App
+# Enfyra
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Nuxt](https://img.shields.io/badge/Nuxt-4-green.svg)](https://nuxt.com/)
-[![Vue](https://img.shields.io/badge/Vue-3-green.svg)](https://vuejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)](https://www.typescriptlang.org/)
+[Enfyra](https://demo.enfyra.io/login) is the open-source backend platform.  
+We’re building the flexibility backend framework that automatically generates APIs from your database. You create tables through a visual interface, and Enfyra instantly provides REST & GraphQL APIs for them - no coding required. It's like having a backend developer that never sleeps.
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 A modern, extensible headless CMS built with Nuxt 4, featuring dynamic table management, extension system, API composables with automatic error handling, and a responsive Vue.js interface. Updated deployment structure.
 =======
 ## 🚀 What is Enfyra?
+=======
+## Documentation
+>>>>>>> upstream/main
 
-**Enfyra is a backend framework that automatically generates APIs from your database.** You create tables through a visual interface, and Enfyra instantly provides REST & GraphQL APIs for them - no coding required. It's like having a backend developer that never sleeps.
+For full documentation, visit [docs](https://github.com/Enfyra/documents)
 
-**What can you build with Enfyra?**
-- **E-commerce platforms** - Products, orders, customers, inventory
-- **Content websites** - Blogs, news sites, documentation portals  
-- **Business applications** - CRM, project management, internal tools
-- **Mobile app backends** - User management, data sync, push notifications
-- **Any data-driven system** - If it needs a database and API, Enfyra can power it
+To see how to contribute, visit [Contributing](https://github.com/Enfyra/backend/blob/main/CONTRIBUTING.md)
 
-### 💪 No-Code Simplicity, Full-Code Power
+## Community & Support
 
-Unlike typical no-code platforms that limit you to predefined features, **Enfyra gives you complete control over every aspect of your API lifecycle**:
+- [Community Forum](https://github.com/enfyra/enfyra/discussions)
+- [GitHub Issues](https://github.com/Enfyra/app/issues)
+- [Discord](https://discord.enfyra.io)
 
-- **Before Hooks**: Validate, transform, or enrich data before it hits the database
-- **Custom Handlers**: Replace default CRUD operations with your own business logic
-- **After Hooks**: Trigger workflows, send notifications, or sync with external services
-- **Dynamic Extensions**: Build custom UI components that integrate seamlessly with the admin panel
-- **Query Interceptors**: Modify queries, add custom filters, or implement complex access rules
+## How it works
+**Architecture**
 
-**The result?** Start building in minutes with no-code, but never hit a ceiling when your requirements grow complex. Every API endpoint can be customized, every workflow can be automated, and every business rule can be implemented - all without forking or modifying the core system.
+Enfyra is a self-hosted and locally developed, easy-to-install. Cloud coming soon.
 
+<<<<<<< HEAD
 ### ⚡ Key Differentiators
 
 **🔥 Real-time Everything**
@@ -169,3 +166,11 @@ Built with ❤️ using:
 - [Vue.js](https://vuejs.org/) - The Progressive JavaScript Framework
 - [Nuxt UI](https://ui.nuxt.com/) - UI Components
 - [TypeScript](https://www.typescriptlang.org/) - Type Safety
+=======
+- **Query Engine**: high-performance engine for filtering, joins, aggregates, and search directly through your API.
+- **Realtime**: push updates to clients when rows change using websockets.
+- **REST/GraphQL API**: automatically generated from your schema.
+- **Auth Service**: JWT-based authentication API for sign-ups, logins, and session management.
+- **Storage**: RESTful API for managing files and permissions.
+- **Functions**: run server-side code close to your data.
+>>>>>>> upstream/main
