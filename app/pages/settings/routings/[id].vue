@@ -33,7 +33,7 @@
             ref="formEditorRef"
             v-model="form"
             v-model:errors="errors"
-            v-model:has-changes="hasFormChanges"
+            @has-changed="(hasChanged) => hasFormChanges = hasChanged"
             :table-name="tableName"
             :excluded="['routePermissions', 'mainTable']"
             :loading="loading"
@@ -188,6 +188,7 @@ async function updateRoute() {
 
   await loadRoutes();
 
+  // Confirm form changes as new baseline
   formEditorRef.value?.confirmChanges();
 }
 

@@ -162,7 +162,7 @@ export interface FormValidationResult {
 
 export interface FormChangesState {
   originalData: Readonly<Ref<Record<string, any>>>;
-  hasChanges: Readonly<Ref<boolean>>;
   update: (newData: Record<string, any>) => void;
   checkChanges: (currentData: Record<string, any>) => boolean;
+  discardChanges: (currentData: Record<string, any>) => Record<string, any>;
 }

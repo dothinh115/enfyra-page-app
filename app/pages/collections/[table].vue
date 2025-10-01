@@ -10,6 +10,9 @@ const { isTablet } = useScreen();
 const { isMounted } = useMounted();
 
 const table = ref<any>();
+const hasFormChanges = ref(false);
+const { useFormChanges } = useSchema();
+const formChanges = useFormChanges();
 
 const {
   data: tableData,
@@ -48,6 +51,22 @@ const {
 
 useHeaderActionRegistry([
   {
+    id: "reset-table",
+    label: "Reset",
+    icon: "lucide:rotate-ccw",
+    variant: "outline",
+    color: "warning",
+    disabled: computed(
+      () =>
+        schemaLoading.value ||
+        saving.value ||
+        deleting.value ||
+        !hasFormChanges.value
+    ),
+    onClick: handleReset,
+    show: computed(() => hasFormChanges.value),
+  },
+  {
     id: "save-table",
     label: "Save",
     icon: "lucide:save",
@@ -59,7 +78,8 @@ useHeaderActionRegistry([
         (table.value?.isSystem &&
           !isSystemTableModifiable(table.value?.name)) ||
         schemaLoading.value ||
-        deleting.value
+        deleting.value ||
+        !hasFormChanges.value
     ),
     submit: save,
     permission: {
@@ -117,6 +137,8 @@ async function initializeForm() {
   const data = tableData.value?.data?.[0];
   if (data) {
     table.value = data;
+    formChanges.update(data); // Set original data
+    hasFormChanges.value = false;
   }
 }
 
@@ -146,6 +168,32 @@ async function patchTable() {
     color: "success",
     description: "Table structure updated!",
   });
+
+  // Reset form changes after successful save
+  formChanges.update(table.value);
+  hasFormChanges.value = false;
+}
+
+async function handleReset() {
+  const ok = await confirm({
+    title: "Reset Changes",
+    content: "Are you sure you want to discard all changes? All modifications will be lost.",
+  });
+  if (!ok) {
+    return;
+  }
+
+  // Reset table to original state
+  if (formChanges.originalData.value) {
+    table.value = formChanges.discardChanges(table.value);
+    hasFormChanges.value = false;
+    
+    toast.add({
+      title: "Reset Complete",
+      color: "success",
+      description: "All changes have been discarded.",
+    });
+  }
 }
 
 async function handleDelete() {
@@ -177,6 +225,23 @@ async function deleteTable() {
   });
   return navigateTo(`/collections`);
 }
+
+// Watch for form changes
+watch(
+  () => table.value,
+  (newValue) => {
+    if (
+      newValue &&
+      Object.keys(newValue).length > 0 &&
+      formChanges.originalData.value &&
+      Object.keys(formChanges.originalData.value).length > 0
+    ) {
+      const hasChanged = formChanges.checkChanges(newValue);
+      hasFormChanges.value = hasChanged;
+    }
+  },
+  { deep: true }
+);
 
 onMounted(() => {
   initializeForm();
