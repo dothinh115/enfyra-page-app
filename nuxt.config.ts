@@ -16,6 +16,16 @@ export default defineNuxtConfig({
   ],
   serverHandlers: [
     {
+      route: "**",
+      handler: "server/middleware/cors.ts",
+      middleware: true,
+    },
+    {
+      route: "**",
+      handler: "server/middleware/server-id.ts",
+      middleware: true,
+    },
+    {
       route: "/enfyra/api/npm-search",
       handler: "server/api/npm-search.get.ts",
       method: "get",
@@ -30,11 +40,7 @@ export default defineNuxtConfig({
       handler: "server/api/extension_definition/[id].patch.ts",
       method: "patch",
     },
-    {
-      route: "**",
-      handler: "server/middleware/server-id.ts",
-      middleware: true,
-    },
+    
   ],
   colorMode: {
     preference: "dark",
@@ -93,5 +99,10 @@ export default defineNuxtConfig({
   },
   enfyraSDK: {
     apiUrl: process.env.API_URL,
+  },
+  runtimeConfig: {
+    public: {
+      baseUrl: process.env.NUXT_PUBLIC_BASE_URL,
+    },
   },
 });
