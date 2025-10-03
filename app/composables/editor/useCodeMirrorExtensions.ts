@@ -13,7 +13,12 @@ import {
   dropCursor,
   rectangularSelection,
   crosshairCursor,
+  Decoration,
+  ViewPlugin,
+  ViewUpdate,
 } from "@codemirror/view";
+import type { DecorationSet } from "@codemirror/view";
+import { RangeSetBuilder } from "@codemirror/state";
 import {
   indentWithTab,
   history,
@@ -38,6 +43,56 @@ import {
 import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
 
 export function useCodeMirrorExtensions() {
+  // Enfyra syntax highlighting plugin
+  const enfyraSyntaxPlugin = ViewPlugin.fromClass(class {
+    decorations: DecorationSet
+
+    constructor(view: EditorView) {
+      this.decorations = this.buildDecorations(view)
+    }
+
+    update(update: ViewUpdate) {
+      if (update.docChanged || update.viewportChanged) {
+        this.decorations = this.buildDecorations(update.view)
+      }
+    }
+
+    buildDecorations(view: EditorView): DecorationSet {
+      const builder = new RangeSetBuilder<Decoration>()
+      const doc = view.state.doc
+      
+      // Define decoration types for Enfyra syntax
+      const templateDecoration = Decoration.mark({
+        class: "cm-enfyra-template",
+      })
+      
+      const tableAccessDecoration = Decoration.mark({
+        class: "cm-enfyra-table",
+      })
+
+      for (let { from, to } of view.visibleRanges) {
+        const text = doc.sliceString(from, to)
+        
+        // Match @ templates (e.g., @CACHE, @REPOS, etc.)
+        const templateRegex = /@(CACHE|REPOS|HELPERS|LOGS|ERRORS|BODY|DATA|STATUS|PARAMS|QUERY|USER|REQ|SHARE|API|UPLOADED|THROW)\b/g
+        let match
+        while ((match = templateRegex.exec(text)) !== null) {
+          builder.add(from + match.index, from + match.index + match[0].length, templateDecoration)
+        }
+        
+        // Match # table access (e.g., #users, #posts, etc.)
+        const tableRegex = /#([a-z_]+)\b/g
+        while ((match = tableRegex.exec(text)) !== null) {
+          builder.add(from + match.index, from + match.index + match[0].length, tableAccessDecoration)
+        }
+      }
+      
+      return builder.finish()
+    }
+  }, {
+    decorations: v => v.decorations,
+  })
+
   // Smart Vue indent service - disable indent only at script root level
   const vueIndentService = indentService.of((context, pos) => {
     const doc = context.state.doc;
@@ -136,6 +191,15 @@ export function useCodeMirrorExtensions() {
         offset = text.indexOf(scriptMatch[1] || '');
       }
       
+      // Check if code contains Enfyra syntax - if so, skip linting entirely
+      const hasEnfyraSyntax = /@(CACHE|REPOS|HELPERS|LOGS|ERRORS|BODY|DATA|STATUS|PARAMS|QUERY|USER|REQ|SHARE|API|UPLOADED|THROW)\b/.test(codeToLint) || 
+                             /#[a-z_]+\b/.test(codeToLint);
+      
+      if (hasEnfyraSyntax) {
+        // Skip linting for code with Enfyra syntax
+        return diagnostics;
+      }
+      
       try {
         // Parse với acorn - allow return at root level for JavaScript
         const parseOptions: any = {
@@ -230,6 +294,7 @@ export function useCodeMirrorExtensions() {
       indentUnit.of("  "),
       createLinter(language, onDiagnostics),
       lintGutter(),
+      enfyraSyntaxPlugin, // Add Enfyra syntax highlighting
       keymap.of([
         {
           key: "Enter",
