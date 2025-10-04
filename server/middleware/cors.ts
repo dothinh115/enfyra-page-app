@@ -14,8 +14,8 @@ export default defineEventHandler(async (event) => {
 
   // Bỏ qua CORS check cho các API auth (login, logout, register, etc.)
   const authPaths = [
-    '/auth/login',
-    '/auth/logout',
+    '/enfyra/auth/login',
+    '/enfyra/auth/logout',
   ]
   
   const isAuthPath = authPaths.some(path => event.node.req.url?.startsWith(path))
