@@ -12,6 +12,18 @@ export default defineEventHandler(async (event) => {
     return
   }
 
+  // Bỏ qua CORS check cho các API auth (login, logout, register, etc.)
+  const authPaths = [
+    '/auth/login',
+    '/auth/logout',
+  ]
+  
+  const isAuthPath = authPaths.some(path => event.node.req.url?.startsWith(path))
+  if (isAuthPath) {
+    console.log('🔓 CORS BYPASS: Auth endpoint', event.node.req.url)
+    return
+  }
+
   // Lấy thông tin chi tiết về request
   const origin = event.node.req.headers.origin
   const referer = event.node.req.headers.referer
