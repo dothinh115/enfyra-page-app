@@ -15,11 +15,11 @@ export default defineNuxtConfig({
     // "../enfyra-sdk-nuxt/dist/module.mjs",
   ],
   serverHandlers: [
-    {
-      route: "**",
-      handler: "server/middleware/cors.ts",
-      middleware: true,
-    },
+    // {
+    //   route: "**",
+    //   handler: "server/middleware/cors.ts",
+    //   middleware: true,
+    // },
     {
       route: "**",
       handler: "server/middleware/server-id.ts",
