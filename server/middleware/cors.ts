@@ -24,6 +24,11 @@ export default defineEventHandler(async (event) => {
     return
   }
 
+  console.log('🛡️ CORS CHECK START:', {
+    url: event.node.req.url,
+    method: event.node.req.method
+  })
+
   // Lấy thông tin chi tiết về request
   const origin = event.node.req.headers.origin
   const referer = event.node.req.headers.referer
@@ -176,6 +181,8 @@ export default defineEventHandler(async (event) => {
     origin: origin || 'none',
     referer: referer || 'none',
     host: host || 'none',
-    rateLimitCount: rateLimitData?.count || 1
+    rateLimitCount: rateLimitData?.count || 1,
+    url: event.node.req.url,
+    method: event.node.req.method
   })
 })
