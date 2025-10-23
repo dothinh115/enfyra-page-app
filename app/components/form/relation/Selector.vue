@@ -28,10 +28,14 @@ const { schemas } = useSchema();
 const { getId, getIdFieldName } = useDatabase();
 
 const targetTable = computed(() => {
-  const targetId = getId(props.relationMeta?.targetTable);
-  return (Object.values(schemas.value).find(
+  const targetTableRef = props.relationMeta?.targetTable;
+  const targetId = typeof targetTableRef === 'string'
+    ? targetTableRef
+    : getId(targetTableRef);
+
+  return Object.values(schemas.value).find(
     (schema: any) => getId(schema) === targetId
-  ) || null) as any;
+  ) || null;
 });
 
 // Get schema for the target table - computed to handle reactive props

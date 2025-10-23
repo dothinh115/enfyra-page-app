@@ -70,8 +70,10 @@ onMounted(() => {
   createForm.value = generateEmptyForm();
   // Set createdBy to current user
   const { me } = useEnfyraAuth();
-  if (me.value?.id) {
-    createForm.value.createdBy = { id: me.value.id };
+  const { getId } = useDatabase();
+  const userId = getId(me.value);
+  if (userId) {
+    createForm.value.createdBy = { id: userId };
   }
 });
 
@@ -99,7 +101,8 @@ async function handleCreate() {
     color: "success",
   });
 
-  await navigateTo(`/settings/bootstrap/${createData.value.data[0].id}`, {
+  const { getId } = useDatabase();
+  await navigateTo(`/settings/bootstrap/${getId(createData.value.data[0])}`, {
     replace: true,
   });
 }

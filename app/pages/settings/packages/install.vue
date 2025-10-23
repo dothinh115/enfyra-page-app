@@ -152,9 +152,11 @@ onMounted(() => {
 function initializeForm() {
   form.value = generateEmptyForm();
 
-  if (me.value?.id) {
+  const { getId } = useDatabase();
+  const userId = getId(me.value);
+  if (userId) {
     form.value.installedBy = {
-      id: me.value.id,
+      id: userId,
     };
   }
 }
@@ -205,7 +207,8 @@ async function handleCreate() {
     return;
   }
 
-  const packageId = createData.value?.data?.[0].id;
+  const { getId } = useDatabase();
+  const packageId = getId(createData.value?.data?.[0]);
 
   toast.add({
     title: "Package installed successfully",

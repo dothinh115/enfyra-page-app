@@ -94,58 +94,75 @@ export function useMenuRegistry() {
     bottomMiniSidebars.value = [];
   };
 
-  // Unified function to register all menus from API response
   const registerAllMenusFromApi = async (menuDefinitions: MenuDefinition[]) => {
     if (!menuDefinitions || menuDefinitions.length === 0) return;
 
-    // FIRST: Register mini sidebars (type: "Mini Sidebar") - sorted by order
     const miniSidebarsData = menuDefinitions
       .filter((item) => item.type === "Mini Sidebar" && item.isEnabled)
       .sort((a, b) => a.order - b.order);
 
     if (miniSidebarsData.length > 0) {
       const sidebarsToRegister = miniSidebarsData
-        .filter((sidebar) => getId(sidebar)) // Filter out items without id
+        .filter((sidebar) => getId(sidebar))
         .map((sidebar) => ({
           id: String(getId(sidebar)),
           label: sidebar.label,
           icon: sidebar.icon,
           route: sidebar.path,
           permission: sidebar.permission || undefined,
-          position: "top" as const, // Default to top for API registered sidebars
+          position: "top" as const,
         }));
       registerMiniSidebar(sidebarsToRegister);
     }
 
-    // SECOND: Register dropdown menus (type: "Dropdown Menu") - sorted by order
     const dropdownMenusData = menuDefinitions
       .filter((item) => item.type === "Dropdown Menu" && item.isEnabled)
       .sort((a, b) => a.order - b.order);
 
+    const regularMenuItems = menuDefinitions
+      .filter((item) => item.type === "Menu" && item.isEnabled)
+      .sort((a, b) => a.order - b.order);
+
     if (dropdownMenusData.length > 0) {
       dropdownMenusData.forEach((item) => {
-        // Dropdown menus must have a sidebar
         const sidebarId = getId(item.sidebar);
         const itemId = getId(item);
         if (sidebarId && itemId) {
-          // Copy entire API object to registry for full compatibility
+          const children = regularMenuItems
+            .filter((menuItem) => {
+              const parentId = getId(menuItem.parent);
+              return parentId && String(parentId) === String(itemId);
+            })
+            .map((child) => ({
+              ...child,
+              id: String(getId(child)),
+              sidebarId: String(sidebarId),
+              route: child.path,
+            }));
+
           registerMenuItem({
             ...item,
             id: String(itemId),
             sidebarId: String(sidebarId),
-            route: item.path || "", // Dropdown menus don't have path, use empty string
+            route: item.path || "",
+            children,
           } as any);
         }
       });
     }
 
-    // THIRD: Register regular menu items (type: "Menu") - after sidebars and dropdowns are registered, sorted by order
-    const regularMenuItems = menuDefinitions
-      .filter((item) => item.type === "Menu" && item.isEnabled)
-      .sort((a, b) => a.order - b.order);
-
     if (regularMenuItems.length > 0) {
       regularMenuItems.forEach((item) => {
+        const parentId = getId(item.parent);
+        if (parentId) {
+          const isChildOfDropdown = dropdownMenusData.some(
+            (dropdown) => String(getId(dropdown)) === String(parentId)
+          );
+          if (isChildOfDropdown) {
+            return;
+          }
+        }
+
         // item.sidebar.id is the ID of the sidebar this menu belongs to
         const sidebarId = getId(item.sidebar);
         const itemId = getId(item);
