@@ -36,3 +36,6 @@ AI_MEMORY_FE.md
 # Test coverage reports
 coverage/
 
+# Deployment script (contains sensitive credentials)
+deploy.sh
+
