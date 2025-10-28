@@ -14,6 +14,15 @@ export default defineNuxtConfig({
     "@enfyra/sdk-nuxt",
     // "../enfyra-sdk-nuxt/dist/module.mjs",
   ],
+  fonts: {
+    families: [
+      { name: 'Inter', provider: 'none' }
+    ],
+    defaults: {
+      weights: [400, 500, 600, 700],
+      styles: ['normal'],
+    },
+  },
   serverHandlers: [
     // {
     //   route: "**",
@@ -97,17 +106,13 @@ export default defineNuxtConfig({
       },
     },
   },
-  runtimeConfig: {
-    public: {
-      dbType: process.env.DB_TYPE || 'mysql',
-    },
-  },
   enfyraSDK: {
     // Normalize to avoid trailing slash causing double // in requests
     apiUrl: (process.env.API_URL || "").replace(/\/+$/, ""),
   },
   runtimeConfig: {
     public: {
+      dbType: process.env.DB_TYPE || 'mysql',
       baseUrl: process.env.NUXT_PUBLIC_BASE_URL,
     },
   },
