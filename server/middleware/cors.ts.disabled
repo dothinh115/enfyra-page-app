@@ -4,7 +4,7 @@ import { useRuntimeConfig } from '#imports'
 // Rate limiting storage
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
 const RATE_LIMIT_WINDOW = 60000 // 1 minute
-const RATE_LIMIT_MAX_REQUESTS = 30 // Max requests per minute per IP
+const RATE_LIMIT_MAX_REQUESTS = 200 // Max requests per minute per IP (increased from 30)
 
 export default defineEventHandler(async (event) => {
   // Chỉ áp dụng cho API routes
@@ -37,9 +37,10 @@ export default defineEventHandler(async (event) => {
   const xRealIp = event.node.req.headers['x-real-ip']
   const host = event.node.req.headers.host
   
-  // Lấy IP thật từ request
+  // Lấy IP thật từ request (ưu tiên Cloudflare header)
+  const cfConnectingIp = event.node.req.headers['cf-connecting-ip']
   const xForwardedForStr = Array.isArray(xForwardedFor) ? xForwardedFor[0] : xForwardedFor
-  const clientIp = xRealIp || xForwardedForStr?.split(',')[0]?.trim() || event.node.req.socket?.remoteAddress || 'unknown'
+  const clientIp = cfConnectingIp || xRealIp || xForwardedForStr?.split(',')[0]?.trim() || event.node.req.socket?.remoteAddress || 'unknown'
   
   // Rate limiting check
   const now = Date.now()
@@ -86,9 +87,26 @@ export default defineEventHandler(async (event) => {
     }
   }
   
-  // Chỉ cho phép domain hiện tại
+  // Lấy base domain từ config
   const config = useRuntimeConfig()
-  const currentDomain = config.public.baseUrl
+  const baseUrl = config.public.baseUrl
+  
+  if (!baseUrl) {
+    console.warn('⚠️ CORS: No baseUrl configured')
+    return
+  }
+  
+  // Tạo allowed domains: baseUrl và www version (nếu chưa có www)
+  const allowedDomains = [baseUrl]
+  if (baseUrl.startsWith('https://') && !baseUrl.includes('www.')) {
+    allowedDomains.push(baseUrl.replace('https://', 'https://www.'))
+  }
+  // Thêm non-www version nếu baseUrl có www
+  if (baseUrl.includes('www.')) {
+    allowedDomains.push(baseUrl.replace('www.', ''))
+  }
+  
+  const currentDomain = baseUrl
   
   // Log tất cả thông tin request để debug
   console.log('🔍 CORS DEBUG:', {
@@ -101,32 +119,34 @@ export default defineEventHandler(async (event) => {
     xRealIp,
     url: event.node.req.url,
     method: event.node.req.method,
-    allowedDomain: currentDomain,
+    allowedDomains: allowedDomains,
     rateLimitCount: rateLimitData?.count || 1
   })
   
-  // Kiểm tra CORS nghiêm ngặt
+  // Kiểm tra CORS - chỉ cho phép domain từ baseUrl (và www version)
   let isAllowed = false
   let reason = ''
 
   // Kiểm tra origin
   if (origin) {
-    if (origin === currentDomain) {
+    const originMatch = allowedDomains.some(domain => origin === domain || origin.startsWith(domain))
+    if (originMatch) {
       isAllowed = true
-      reason = 'Valid origin'
+      reason = `Valid origin: ${origin}`
     } else {
       isAllowed = false
-      reason = `Invalid origin: ${origin} !== ${currentDomain}`
+      reason = `Invalid origin: ${origin} (allowed: ${allowedDomains.join(', ')})`
     }
   }
   // Kiểm tra referer nếu không có origin
   else if (referer) {
-    if (referer.startsWith(currentDomain)) {
+    const refererMatch = allowedDomains.some(domain => referer.startsWith(domain))
+    if (refererMatch) {
       isAllowed = true
-      reason = 'Valid referer'
+      reason = `Valid referer: ${referer}`
     } else {
       isAllowed = false
-      reason = `Invalid referer: ${referer}`
+      reason = `Invalid referer: ${referer} (allowed: ${allowedDomains.join(', ')})`
     }
   }
   // Nếu không có cả origin và referer, có thể là request nội bộ
