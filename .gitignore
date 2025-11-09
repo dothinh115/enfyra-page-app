@@ -39,3 +39,4 @@ coverage/
 # Deployment script (contains sensitive credentials)
 deploy.sh
 
+tmp/
