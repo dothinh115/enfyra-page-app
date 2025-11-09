@@ -96,13 +96,12 @@ export default defineNuxtConfig({
   },
   vite: {
     plugins: [tailwindcss()],
+    optimizeDeps: {
+      exclude: ['console-browserify', 'jshint'],
+    },
     build: {
       rollupOptions: {
-        output: {
-          manualChunks: {
-            vendor: ["vue", "vue-router"],
-          },
-        },
+        external: ['util', 'assert'],
       },
     },
   },
