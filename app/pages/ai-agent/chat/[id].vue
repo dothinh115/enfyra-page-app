@@ -856,7 +856,7 @@ onBeforeUnmount(async () => {
     </div>
 
     <!-- Input Area -->
-    <div class="flex-shrink-0">
+    <div class="flex-shrink-0 max-sm:-mb-12">
       <div class="px-6 py-4">
         <div class="max-w-4xl mx-auto">
           <form @submit.prevent="sendMessage">
