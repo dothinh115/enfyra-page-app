@@ -2,21 +2,27 @@ name: Deploy to VPS
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to VPS
-        uses: appleboy/ssh-action@v0.1.5
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          password: ${{ secrets.VPS_PASSWORD }}
-          script: |
+      - name: Install sshpass
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+      - name: Deploy to VPS via sshpass
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+        run: |
+          sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST <<'ENDSSH'
             # Set project variables
-            export PROJECT_NAME="app"
-            export APP_DIR="/apps/$PROJECT_NAME"
+            export PROJECT_NAME="enfyra-app"
+            export APP_DIR="/apps/app"
 
             # Setup PATH for tools
             export PATH="$PATH:/usr/bin:/usr/local/bin:$HOME/.local/bin"
@@ -38,7 +44,7 @@ jobs:
             echo "Tools found:"
             echo "Git: $GIT_PATH"
             echo "NPM: $NPM_PATH"
-            echo "Yarn: $YARN_PATH" 
+            echo "Yarn: $YARN_PATH"
             echo "PM2: $PM2_PATH"
 
             # Navigate to app directory
@@ -55,6 +61,11 @@ jobs:
             # Install dependencies with yarn
             echo "Installing dependencies with yarn..."
             $YARN_PATH install --frozen-lockfile
+
+            # Ensure environment file exists (CI only verifies presence)
+            if [ ! -f .env ]; then
+              echo "⚠️  .env not found. Please provision /apps/app/.env manually on the server."
+            fi
 
             # Build application
             echo "Building application..."
@@ -76,6 +87,17 @@ jobs:
             # Show PM2 status
             $PM2_PATH status
 
+            # Health check summary
+            echo "=== Health Check ==="
+            sleep 5
+            if $PM2_PATH show $PROJECT_NAME | grep -q "online"; then
+              echo "✅ Application is running successfully"
+            else
+              echo "❌ Application failed to start"
+              $PM2_PATH logs $PROJECT_NAME --lines 20 --nostream
+              exit 1
+            fi
+
             # Show logs without tailing (just print and exit)
             echo "=== Recent logs ==="
             $PM2_PATH logs $PROJECT_NAME --lines 30 --nostream || {
@@ -84,3 +106,4 @@ jobs:
             }
 
             echo "=== PM2 Deployment completed successfully ==="
+          ENDSSH
