@@ -21,8 +21,8 @@ jobs:
         run: |
           sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST <<'ENDSSH'
             # Set project variables
-            export PROJECT_NAME="enfyra-app"
-            export APP_DIR="/apps/app"
+            export PROJECT_NAME="demo-app"
+            export APP_DIR="/apps/demo-app"
 
             # Setup PATH for tools
             export PATH="$PATH:/usr/bin:/usr/local/bin:$HOME/.local/bin"
