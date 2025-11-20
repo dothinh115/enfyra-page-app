@@ -10,6 +10,10 @@ module.exports = {
       autorestart: true,
       min_uptime: "10s",
       max_restarts: 10,
+      env: {
+        PORT: 3001,
+        NODE_ENV: "production"
+      }
     },
   ],
 };
